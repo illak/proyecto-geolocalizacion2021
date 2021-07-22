@@ -21,8 +21,10 @@ departamentos <- st_cast(departamentos, "GEOMETRYCOLLECTION") %>% st_collection_
 establecimientos_filtrados <- st_join(establecimientos, departamentos)
 
 # Esto SI funciona
-establecimientos_filtrados <- st_filter(establecimientos, dep2, .predicate = st_intersects)
+establecimientos_filtrados <- st_filter(establecimientos, departamentos, .predicate = st_intersects)
 
 ggplot() +
-  geom_sf(data = dep2) +
-  geom_sf(data = establecimientos_filtrados)
+  geom_sf(data = departamentos) +
+  geom_sf(data = establecimientos_filtrados, aes(color = sector), alpha = .5) +
+  facet_wrap(vars(modalidad)) +
+  theme_void()
