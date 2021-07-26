@@ -2,10 +2,21 @@ Proyecto Geolocalización en R 2021
 ================
 Illak Zapata
 
+## Carga de librerias
+
 ``` r
 library(sf)
 library(tidyverse)
 ```
+
+## Carga de datos
+
+Se obtienen los datos mediante geoservicios de [Mapas
+Córdoba](https://www.mapascordoba.gob.ar/#/geoservicios). Vamos a
+trabajar con dos dataset geográficos:
+
+-   Departamentos de Córdoba
+-   Establecimientos educativos
 
 ``` r
 establecimientos_ed <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?getcapabilities")
@@ -54,6 +65,11 @@ establecimientos_filtrados <- st_filter(establecimientos, departamentos, .predic
   filter(oferta != "Común - Jardín de infantes")
 ```
 
+## Graficamos a modo de prueba
+
+Para probar los dataset realizamos la gráfica de los departamentos y
+establecimientos haciendo diferencia por modalidad y sector.
+
 ``` r
 ggplot() +
   geom_sf(data = departamentos) +
@@ -64,8 +80,16 @@ ggplot() +
 
 ![](Proyecto_files/figure-gfm/plot1-1.png)<!-- -->
 
+## Gráfica principal
+
+La idea es obtener una visualización que nos permita responder a la
+pregunta:
+
+¿Cuántos establecimientos educativos (rurales y urbanos) existen a 125KM
+de los Institutos de Formación Docente asociados?
+
 ``` r
-# Listado de IFDA
+# Listado de IFDA. Armamos un listado de forma manual de los IFDA que nos interesan.
 ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.174242,-32.397557,-31.4305685,-33.1268737,-34.1328932), 
                                   longitude = c(-64.5298422,-65.006453,-64.1156697,-63.2500767,-62.0835059,-64.3528865,-63.3937023),
                                   instituto = c("Instituto Superior Dr. Bernardo Houssay\n – Capilla del Monte.",
@@ -79,7 +103,7 @@ ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.17424
                        crs = 4326,
                        agr = "constant")
 
-# Pasamos a un CRS que mida en metros para el BUFFER
+# Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer
 ifda_lista <- st_transform(ifda_lista, crs = 7801)
 # Calculamos circulos para cada IFDA con un radio de 120KM
 dat_circles <- st_buffer(ifda_lista, dist=125000)
@@ -124,7 +148,7 @@ ggplot() +
   geom_sf(data = diff2, alpha = .1) +
   theme_void() +
   labs(
-    title = "Institutos de Formación Docente asociados y establecimientos a 120KM",
+    title = "Institutos de Formación Docente asociados y establecimientos a 125KM",
     subtitle = "En capital hay 4 IFDA"
   ) +
   theme(
