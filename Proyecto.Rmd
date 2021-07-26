@@ -1,9 +1,26 @@
+---
+title: "Proyecto Geolocalización en R 2021"
+author: "Illak Zapata"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width = 900 / 72,
+                      fig.height = 900 / 72,
+                      dpi = 72,
+                      fig.retina = 1)
+```
+
+```{r carga de librerias, message=FALSE}
 library(sf)
 library(tidyverse)
+```
 
-
+```{r carga de datos, message=FALSE}
 establecimientos_ed <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?getcapabilities")
 departamentos_cba <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?getcapabilities")
+
 
 # Establecimientos educativos
 baseurl1 <- "https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?request=GetFeature&service=WFS&typeName="
@@ -28,11 +45,21 @@ departamentos <- st_transform(departamentos, crs=4326)
 establecimientos_filtrados <- st_filter(establecimientos, departamentos, .predicate = st_intersects) %>% 
   filter(oferta != "Común - Jardín de infantes")
 
+```
+
+
+
+
+```{r plot1}
 ggplot() +
   geom_sf(data = departamentos) +
   geom_sf(data = establecimientos_filtrados, aes(color = sector), alpha = .5) +
   facet_wrap(vars(modalidad)) +
   theme_void()
+```
+
+
+```{r plot IFDA y UE, message=FALSE}
 
 
 # Listado de IFDA
@@ -91,4 +118,10 @@ ggplot() +
   labs(
     title = "Institutos de Formación Docente asociados y establecimientos a 120KM",
     subtitle = "En capital hay 4 IFDA"
+  ) +
+  theme(
+    plot.title.position = "plot"
   )
+
+```
+
