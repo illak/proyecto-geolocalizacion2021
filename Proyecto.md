@@ -1,23 +1,13 @@
----
-title: "Proyecto Geolocalización en R 2021"
-author: "Illak Zapata"
-output: rmarkdown::github_document
----
+Proyecto Geolocalización en R 2021
+================
+Illak Zapata
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      fig.width = 900 / 72,
-                      fig.height = 900 / 72,
-                      dpi = 72,
-                      fig.retina = 1)
-```
-
-```{r carga de librerias, message=FALSE}
+``` r
 library(sf)
 library(tidyverse)
 ```
 
-```{r carga de datos, message=FALSE}
+``` r
 establecimientos_ed <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?getcapabilities")
 departamentos_cba <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?getcapabilities")
 
@@ -26,14 +16,32 @@ departamentos_cba <- st_layers("WFS:https://idecor-ws.mapascordoba.gob.ar/geoser
 baseurl1 <- "https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?request=GetFeature&service=WFS&typeName="
 capa_wfs1 <- "idecor:Establecimientos_educativos"
 establecimientos <- st_read(paste0(baseurl1,capa_wfs1))
+```
+
+    ## Reading layer `Establecimientos_educativos' from data source `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?request=GetFeature&service=WFS&typeName=idecor:Establecimientos_educativos' using driver `GML'
+    ## Simple feature collection with 6311 features and 12 fields
+    ## Geometry type: POINT
+    ## Dimension:     XY
+    ## Bounding box:  xmin: 4245400 ymin: 2415727 xmax: 6069750 ymax: 6739150
+    ## Projected CRS: POSGAR 98 / Argentina 4
+
+``` r
 establecimientos <- st_transform(establecimientos, crs=4326)
 
 # Departamentos
 baseurl2 <- "https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?request=GetFeature&service=WFS&typeName="
 capa_wfs2 <- "idecor:departamentos"
 departamentos <- st_read(paste0(baseurl2, capa_wfs2))
+```
 
+    ## Reading layer `departamentos' from data source `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?request=GetFeature&service=WFS&typeName=idecor:departamentos' using driver `GML'
+    ## Simple feature collection with 26 features and 3 fields
+    ## Geometry type: MULTISURFACE
+    ## Dimension:     XY
+    ## Bounding box:  xmin: 4235427 ymin: 6123609 xmax: 4614919 ymax: 6736737
+    ## Projected CRS: POSGAR 98 / Argentina 4
 
+``` r
 # Casteamos a GEOMETRYCOLLECTION sino no funciona el join (ES UN MULTISURFACE)
 departamentos <- st_cast(departamentos, "GEOMETRYCOLLECTION") %>% st_collection_extract("POLYGON")
 departamentos <- st_transform(departamentos, crs=4326)
@@ -44,13 +52,9 @@ departamentos <- st_transform(departamentos, crs=4326)
 # Esto SI funciona
 establecimientos_filtrados <- st_filter(establecimientos, departamentos, .predicate = st_intersects) %>% 
   filter(oferta != "Común - Jardín de infantes")
-
 ```
 
-
-
-
-```{r plot1}
+``` r
 ggplot() +
   geom_sf(data = departamentos) +
   geom_sf(data = establecimientos_filtrados, aes(color = sector), alpha = .5) +
@@ -58,10 +62,9 @@ ggplot() +
   theme_void()
 ```
 
+![](Proyecto_files/figure-gfm/plot1-1.png)<!-- -->
 
-```{r plot IFDA y UE, message=FALSE}
-
-
+``` r
 # Listado de IFDA
 ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.174242,-32.397557,-31.4305685,-33.1268737,-34.1328932), 
                                   longitude = c(-64.5298422,-65.006453,-64.1156697,-63.2500767,-62.0835059,-64.3528865,-63.3937023),
@@ -91,7 +94,12 @@ intersec <- st_intersection(establecimientos_filtrados, dat_circles) %>%
     TRUE ~ "Rural"
   )) %>% 
   mutate(ambito = factor(ambito))
+```
 
+    ## Warning: attribute variables are assumed to be spatially constant throughout all
+    ## geometries
+
+``` r
 # Combinamos los circulos
 dat_circles2 <- st_union(dat_circles)
 
@@ -122,6 +130,6 @@ ggplot() +
   theme(
     plot.title.position = "plot"
   )
-
 ```
 
+![](Proyecto_files/figure-gfm/plot%20IFDA%20y%20UE-1.png)<!-- -->
