@@ -107,9 +107,9 @@ ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.17424
                        crs = 4326,
                        agr = "constant")
 
-# Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer
+# Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer (POSGAR FAJA 4)
 ifda_lista <- st_transform(ifda_lista, crs = 5346)
-# Calculamos circulos para cada IFDA con un radio de 120KM
+# Calculamos circulos para cada IFDA con un radio de 60KM
 dat_circles <- st_buffer(ifda_lista, dist=60000)
 # Volvemos al CRS 4326
 dat_circles <- st_transform(dat_circles, crs = 4326)
@@ -154,7 +154,7 @@ plot <- ggplot() +
   geom_sf(data = diff2, alpha = .1) +
   theme_void() +
   labs(
-    title = "Institutos de Formación Docente asociados y establecimientos a 125KM",
+    title = "Institutos de Formación Docente asociados y establecimientos a 60KM",
     subtitle = "En capital hay 4 IFDA"
   ) +
   theme(
