@@ -29,7 +29,9 @@ capa_wfs1 <- "idecor:Establecimientos_educativos"
 establecimientos <- st_read(paste0(baseurl1,capa_wfs1))
 ```
 
-    ## Reading layer `Establecimientos_educativos' from data source `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?request=GetFeature&service=WFS&typeName=idecor:Establecimientos_educativos' using driver `GML'
+    ## Reading layer `Establecimientos_educativos' from data source 
+    ##   `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/Establecimientos_educativos/wfs?request=GetFeature&service=WFS&typeName=idecor:Establecimientos_educativos' 
+    ##   using driver `GML'
     ## Simple feature collection with 6311 features and 12 fields
     ## Geometry type: POINT
     ## Dimension:     XY
@@ -45,7 +47,9 @@ capa_wfs2 <- "idecor:departamentos"
 departamentos <- st_read(paste0(baseurl2, capa_wfs2))
 ```
 
-    ## Reading layer `departamentos' from data source `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?request=GetFeature&service=WFS&typeName=idecor:departamentos' using driver `GML'
+    ## Reading layer `departamentos' from data source 
+    ##   `https://idecor-ws.mapascordoba.gob.ar/geoserver/idecor/departamentos/wfs?request=GetFeature&service=WFS&typeName=idecor:departamentos' 
+    ##   using driver `GML'
     ## Simple feature collection with 26 features and 3 fields
     ## Geometry type: MULTISURFACE
     ## Dimension:     XY
@@ -104,9 +108,9 @@ ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.17424
                        agr = "constant")
 
 # Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer
-ifda_lista <- st_transform(ifda_lista, crs = 7801)
+ifda_lista <- st_transform(ifda_lista, crs = 5346)
 # Calculamos circulos para cada IFDA con un radio de 120KM
-dat_circles <- st_buffer(ifda_lista, dist=125000)
+dat_circles <- st_buffer(ifda_lista, dist=60000)
 # Volvemos al CRS 4326
 dat_circles <- st_transform(dat_circles, crs = 4326)
 ifda_lista <- st_transform(ifda_lista, crs = 4326)
@@ -140,8 +144,10 @@ x2 <- map_lgl(diff, function(x) {
 # Conjunto de establecimientos que NO cae dentro de los circulos (por fuera)
 diff2 <- establecimientos_filtrados[!x2,]
 
+
+
 # Graficamos
-ggplot() +
+plot <- ggplot() +
   geom_sf(data = departamentos) +
   geom_sf(data = dat_circles2, alpha = .3) +
   geom_sf(data = intersec, aes(color = ambito), alpha = .5) +
@@ -154,6 +160,10 @@ ggplot() +
   theme(
     plot.title.position = "plot"
   )
+
+ggsave("plot.jpg", plot, width = 8, height = 8, dpi = 300)
+
+plot
 ```
 
 ![](Proyecto_files/figure-gfm/plot%20IFDA%20y%20UE-1.png)<!-- -->

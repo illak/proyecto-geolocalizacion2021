@@ -95,10 +95,10 @@ ifda_lista <- st_as_sf(data.frame(latitude = c(-30.8571764,-31.7275439,-32.17424
                        crs = 4326,
                        agr = "constant")
 
-# Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer
-ifda_lista <- st_transform(ifda_lista, crs = 7801)
-# Calculamos circulos para cada IFDA con un radio de 120KM
-dat_circles <- st_buffer(ifda_lista, dist=125000)
+# Pasamos a un CRS que mida en metros para luego poder usar la misma medida con st_buffer (POSGAR FAJA 4)
+ifda_lista <- st_transform(ifda_lista, crs = 5346)
+# Calculamos circulos para cada IFDA con un radio de 60KM
+dat_circles <- st_buffer(ifda_lista, dist=60000)
 # Volvemos al CRS 4326
 dat_circles <- st_transform(dat_circles, crs = 4326)
 ifda_lista <- st_transform(ifda_lista, crs = 4326)
@@ -127,20 +127,26 @@ x2 <- map_lgl(diff, function(x) {
 # Conjunto de establecimientos que NO cae dentro de los circulos (por fuera)
 diff2 <- establecimientos_filtrados[!x2,]
 
+
+
 # Graficamos
-ggplot() +
+plot <- ggplot() +
   geom_sf(data = departamentos) +
   geom_sf(data = dat_circles2, alpha = .3) +
   geom_sf(data = intersec, aes(color = ambito), alpha = .5) +
   geom_sf(data = diff2, alpha = .1) +
   theme_void() +
   labs(
-    title = "Institutos de Formación Docente asociados y establecimientos a 125KM",
+    title = "Institutos de Formación Docente asociados y establecimientos a 60KM",
     subtitle = "En capital hay 4 IFDA"
   ) +
   theme(
     plot.title.position = "plot"
   )
+
+ggsave("plot.jpg", plot, width = 8, height = 8, dpi = 300)
+
+plot
 
 ```
 
